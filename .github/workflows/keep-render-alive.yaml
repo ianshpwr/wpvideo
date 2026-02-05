@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Ping Render Backend
         run: |
-          curl -s https://YOUR-RENDER-APP.onrender.com/docs > /dev/null
+          curl -s https://wpvideo.onrender.com/docs > /dev/null
