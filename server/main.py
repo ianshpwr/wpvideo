@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import yt_dlp
@@ -43,21 +43,16 @@ def download_video(data: dict):
     return {"video_id": video_id}
 
 @app.get("/video/{video_id}")
-def get_video(video_id: str):
+def get_video(video_id: str, background_tasks: BackgroundTasks):
     filepath = f"{DOWNLOAD_DIR}/{video_id}.mp4"
 
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
 
-    def iterfile():
-        with open(filepath, "rb") as file:
-            yield from file
-        os.remove(filepath) 
+    background_tasks.add_task(os.remove, filepath)
 
-    return StreamingResponse(
-        iterfile(),
+    return FileResponse(
+        filepath,
         media_type="video/mp4",
-        headers={
-            "Content-Disposition": "attachment; filename=reel.mp4"
-        }
+        filename="reel.mp4"
     )
