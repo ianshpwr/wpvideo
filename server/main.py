@@ -49,4 +49,15 @@ def get_video(video_id: str):
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="File not found")
 
-    return FileResponse(filepath, media_type="video/mp4", filename="reel.mp4")
+    def iterfile():
+        with open(filepath, "rb") as file:
+            yield from file
+        os.remove(filepath) 
+
+    return StreamingResponse(
+        iterfile(),
+        media_type="video/mp4",
+        headers={
+            "Content-Disposition": "attachment; filename=reel.mp4"
+        }
+    )
